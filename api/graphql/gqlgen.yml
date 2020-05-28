@@ -1,0 +1,19 @@
+# .gqlgen.yml example
+#
+# Refer to https://gqlgen.com/config/
+# for detailed .gqlgen.yml documentation.
+
+schema:
+  - schema/health.graphql
+  - schema/schema.graphql
+exec:
+  filename: gen/exec.go
+model:
+  filename: gen/models_gen.go
+
+autobind:
+ - github.com/daesu/stoicadon/models
+
+models:
+  Health:
+    model: models.Health

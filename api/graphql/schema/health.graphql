@@ -1,0 +1,5 @@
+
+type Health {
+    Mastodon: String!
+    Database: String!
+}
