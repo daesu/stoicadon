@@ -1,0 +1,10 @@
+version: 2
+mergeable:
+  - when: pull_request.labeled, pull_request_review.labeled
+    validate:
+      - do: label
+        no_empty:
+          enabled: true
+        must_exclude:
+          regex: "qa: needed|qa: rejected"
+          message: "Need be tested by QA"

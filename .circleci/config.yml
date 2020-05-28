@@ -1,0 +1,47 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.14.1
+      - image: circleci/postgres:12.1-alpine
+        environment:
+          APP_ENV: test
+          POSTGRES_USER: postgres
+          POSTGRES_DB: stoicadon-test
+
+    working_directory: /go/src/github.com/daesu/stoicadon
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - go-cache-{{ checksum "go.sum" }}
+            - go-cache-
+      - run: go get -u github.com/99designs/gqlgen
+      - save_cache:
+          key: go-cache-{{ checksum "go.sum" }}
+          paths:
+            - vendor
+      - run:
+          name: install deps
+          command: make setup
+      - run:
+          name: Install dbmate
+          command: sudo curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/download/v1.7.0/dbmate-linux-amd64 && sudo chmod +x /usr/local/bin/dbmate
+      - run:
+          name: Generate
+          command: make generate
+      - run:
+          name: Build
+          command: make build
+      - run:
+          name: Lint
+          command: make lint
+      - run:
+          name: Run migrations
+          command: make dbmate-up
+      - run:
+          name: Test
+          command: make testsum
+    environment:
+      DATABASE_URL: "postgres://postgres@localhost:5432/stoidadon-test?sslmode=disable"
+      PORT: 8080
