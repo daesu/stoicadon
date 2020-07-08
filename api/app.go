@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/daesu/stoicadon/api/graphql/gen"
@@ -52,9 +53,12 @@ func ConfigureApplication() (*Application, error) {
 		router.Use(c.Handler)
 
 		gqlConfig := gen.Config{Resolvers: resolver}
-		graphqlHandler := handler.New(gen.NewExecutableSchema(gqlConfig))
-		graphqlHandler.AddTransport(transport.POST{})
-		router.Handle("/query", graphqlHandler)
+
+		srv := handler.New(gen.NewExecutableSchema(gqlConfig))
+		srv.AddTransport(&transport.POST{})
+		srv.Use(extension.Introspection{})
+
+		router.Handle("/query", srv)
 	})
 
 	enablePlayground := os.Getenv("ENABLE_PLAYGROUND")
